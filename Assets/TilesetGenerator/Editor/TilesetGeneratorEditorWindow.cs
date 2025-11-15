@@ -18,6 +18,7 @@ namespace TilesetGenerator {
         private const int TEX_OBJ_SIZE = 76;
 
         [SerializeField] private string inputFilename = string.Empty;
+        [SerializeField] private string outputFolderPath = string.Empty;
 
         private Texture2D _inputTexture;
         private Texture2D _convertedInputTexture;
@@ -25,7 +26,7 @@ namespace TilesetGenerator {
         private TilesetGenerator _tilePacker;
 
         private Vector2 _scrollPosition;
-        private bool _validInputSprites = false;
+        private bool _validInputSpriteSheet = false;
 
         private Texture2D _cornersLayoutTexture;
         private Texture2D _invCornersLayoutTexture;
@@ -44,19 +45,22 @@ namespace TilesetGenerator {
         [SerializeField] private Sprite seInvCornerSprite;
         [SerializeField] private Sprite coreSprite;
 
+        [SerializeField] private Texture2D spriteSheet;
+
         private bool _generatingTileset = false;
 
         private Label _spriteStatusLabel;
-        private Label _spritesheetStatusLabel;
-
-        private Button _generateFromSpritesheetButton;
-        private Button _generateFromSpritesButton;
-
+        private Image _spriteStatusIcon;
         private Image _outputTexturePreviewImage;
+        private Button _generateTilesetButton;
+        private Button _browseFolderButton;
+        private TabView _tabs;
 
         private CancellationTokenSource _cancellationTokenSource = new();
 
         [SerializeField] private VisualTreeAsset mVisualTreeAsset;
+
+        private string SelectedTab => _tabs?.activeTab?.label ?? "";
 
         private void OnEnable() {
             mVisualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/TilesetGenerator/Editor/TilesetGeneratorEditorWindow.uxml");
@@ -64,53 +68,54 @@ namespace TilesetGenerator {
 
         [MenuItem("Tools/Tileset Generator")]
         public static void ShowExample() {
-            TilesetGeneratorEditorWindow wnd = GetWindow<TilesetGeneratorEditorWindow>();
+            var wnd = GetWindow<TilesetGeneratorEditorWindow>();
             wnd.titleContent = new("Tileset Generator");
         }
 
         public void CreateGUI() {
-            VisualElement root = rootVisualElement;
+            var root = rootVisualElement;
             VisualElement labelFromUxml = mVisualTreeAsset?.CloneTree();
             root.Add(labelFromUxml);
             root.Bind(new(this));
-            _spritesheetStatusLabel = root.Q<Label>("generation-info-spritesheet");
             _spriteStatusLabel = root.Q<Label>("generation-info-sprites");
-            root.Query<TileField>().ForEach(tile =>
-            {
-                string[] nameParts = tile.name.Split('-');
-                if (nameParts.Length < 2) return;
-                tile.SetSprite(GetSpriteByName(tile.name));
-                var highlightElement = root.Q<VisualElement>(string.Join("-", nameParts[..2]) + "-highlight");
-                if (highlightElement == null) return;
-                tile.RegisterCallback<PointerEnterEvent, VisualElement>((_, vs) => vs.style.opacity = 1, highlightElement);
-                tile.RegisterCallback<PointerLeaveEvent, VisualElement>((_, vs) => vs.style.opacity = 0, highlightElement);
-                tile.OnSpriteChanged += sprite =>
+            _spriteStatusIcon = root.Q<Image>("info-icon");
+            _tabs = root.Q<TabView>("tabs");
+            if (_tabs != null) _tabs.activeTabChanged += (_, _) => GetInputValidation()?.Invoke();
+            root.Query<TileField>()
+                .ForEach(tile =>
                 {
-                    SetSpriteByName(tile.name, sprite);
-                    UpdateSpritesStatus();
-                };
+                    var nameParts = tile.name.Split('-');
+                    if (nameParts.Length < 2) return;
+                    tile.SetSprite(GetSpriteByName(tile.name));
+                    var highlightElement = root.Q<VisualElement>(string.Join("-", nameParts[..2]) + "-highlight");
+                    if (highlightElement == null) return;
+                    tile.RegisterCallback<PointerEnterEvent, VisualElement>((_, vs) => vs.style.opacity = 1, highlightElement);
+                    tile.RegisterCallback<PointerLeaveEvent, VisualElement>((_, vs) => vs.style.opacity = 0, highlightElement);
+                    tile.OnSpriteChanged += sprite =>
+                    {
+                        SetSpriteByName(tile.name, sprite);
+                        GetInputValidation()?.Invoke();
+                    };
+                });
+
+            var spritesheetInputField = root.Q<ObjectField>("input-spritesheet-field");
+            spritesheetInputField?.RegisterValueChangedCallback(evt =>
+            {
+                spriteSheet = evt.newValue as Texture2D;
+                var inputImage = root.Q<Image>("input-image");
+                if (inputImage != null) inputImage.image = spriteSheet; 
+                GetInputValidation()?.Invoke();
             });
 
             _outputTexturePreviewImage = root.Q<Image>("output-image");
             if (_outputTexturePreviewImage != null) _outputTexturePreviewImage.image = _outputTexture;
-            root.Q<Button>("generate-tileset-spritesheet-button").clicked += async () =>
-            {
-                if (_generatingTileset) return;
-                try {
-                    await GenerateTilesetFromSpritesheetAsync();
-                }
-                catch (Exception e) {
-                    EditorUtility.DisplayDialog("Tileset Generation Error", $"An error occurred during tileset generation:\n{e.Message}", "OK");
-                }
-            };
-
-            _generateFromSpritesButton = root.Q<Button>("generate-tileset-sprites-button");
-            if (_generateFromSpritesButton != null) {
-                _generateFromSpritesButton.clicked += async () =>
+            _generateTilesetButton = root.Q<Button>("generate-tileset-sprites-button");
+            if (_generateTilesetButton != null) {
+                _generateTilesetButton.clicked += async () =>
                 {
                     if (_generatingTileset) return;
                     try {
-                        await GenerateTilesetFromSpritesAsync();
+                        await (GetTilesetGenerationTask()?.Invoke() ?? Task.CompletedTask);
                     }
                     catch (Exception e) {
                         EditorUtility.DisplayDialog("Tileset Generation Error", $"An error occurred during tileset generation:\n{e.Message}", "OK");
@@ -118,33 +123,71 @@ namespace TilesetGenerator {
                 };
             }
 
-            UpdateSpritesStatus();
+            _browseFolderButton = root.Q<Button>("browse-folder-button");
+            if (_browseFolderButton != null) {
+                _browseFolderButton.clicked += () =>
+                {
+                    var folderPath = EditorUtility.OpenFolderPanel("Select Output Folder", "Assets/TilesetGenerator/ExportTilemap", "");
+                    if (!string.IsNullOrEmpty(folderPath)) outputFolderPath = folderPath;
+                };
+            }
+
+            GetInputValidation()?.Invoke();
         }
 
+        private Action GetInputValidation() => SelectedTab switch {
+                "Sprites Input"     => UpdateSpritesStatus,
+                "Spritesheet Input" => UpdateSpriteSheetStatus,
+                _                   => null,
+        };
+        
+        private Func<Task> GetTilesetGenerationTask() => SelectedTab switch {
+                "Sprites Input"     => GenerateTilesetFromSpritesAsync,
+                "Spritesheet Input" => GenerateTilesetFromSpritesheetAsync,
+                _                   => null,
+        };
+
         private void UpdateSpritesStatus() {
-            _validInputSprites = ValidateInputSprites();
-            _generateFromSpritesButton?.SetEnabled(_validInputSprites);
-            if (_spriteStatusLabel == null) return;
-            _spriteStatusLabel.text = _validInputSprites
-                ? "All required sprites are assigned."
-                : "Please assign all required sprites.";
+            _validInputSpriteSheet = ValidateInputSprites();
+            _generateTilesetButton?.SetEnabled(_validInputSpriteSheet);
+            if (_spriteStatusLabel != null)
+                _spriteStatusLabel.text = _validInputSpriteSheet
+                        ? "All required sprites are assigned."
+                        : "Please assign all required sprites.";
+            if (_spriteStatusIcon != null)
+                _spriteStatusIcon.image = _validInputSpriteSheet
+                        ? EditorGUIUtility.IconContent("console.infoicon").image
+                        : EditorGUIUtility.IconContent("console.warnicon").image;
+        }
+
+        private void UpdateSpriteSheetStatus() {
+            _validInputSpriteSheet = ValidateInputSpriteSheet();
+            _generateTilesetButton?.SetEnabled(_validInputSpriteSheet);
+            if (_spriteStatusLabel != null)
+                _spriteStatusLabel.text = _validInputSpriteSheet
+                        ? "Required sprite sheet is valid."
+                        : "Please assign an input sprite sheet.";
+            if (_spriteStatusIcon != null)
+                _spriteStatusIcon.image = _validInputSpriteSheet
+                        ? EditorGUIUtility.IconContent("console.infoicon").image
+                        : EditorGUIUtility.IconContent("console.warnicon").image;
         }
 
         private async Task GenerateInputTextureAsync() => _convertedInputTexture = await TilesetTextures.GetInputTextureFromSprites(
-            nwCornerSprite,
-            neCornerSprite,
-            swCornerSprite,
-            seCornerSprite,
-            nShoreSprite,
-            eShoreSprite,
-            sShoreSprite,
-            wShoreSprite,
-            nwInvCornerSprite,
-            neInvCornerSprite,
-            swInvCornerSprite,
-            seInvCornerSprite,
-            coreSprite,
-            (int)neCornerSprite.rect.width);
+                nwCornerSprite,
+                neCornerSprite,
+                swCornerSprite,
+                seCornerSprite,
+                nShoreSprite,
+                eShoreSprite,
+                sShoreSprite,
+                wShoreSprite,
+                nwInvCornerSprite,
+                neInvCornerSprite,
+                swInvCornerSprite,
+                seInvCornerSprite,
+                coreSprite,
+                (int)neCornerSprite.rect.width);
 
         private void SetSpriteByName(string fieldName, Sprite sprite) {
             switch (fieldName) {
@@ -166,22 +209,22 @@ namespace TilesetGenerator {
         }
 
         private Sprite GetSpriteByName(string fieldName) =>
-            fieldName switch {
-                "nw-corner-tile" => nwCornerSprite,
-                "ne-corner-tile" => neCornerSprite,
-                "sw-corner-tile" => swCornerSprite,
-                "se-corner-tile" => seCornerSprite,
-                "n-corner-tile" => nShoreSprite,
-                "e-corner-tile" => eShoreSprite,
-                "s-corner-tile" => sShoreSprite,
-                "w-corner-tile" => wShoreSprite,
-                "nw-inv-corner-tile" => nwInvCornerSprite,
-                "ne-inv-corner-tile" => neInvCornerSprite,
-                "sw-inv-corner-tile" => swInvCornerSprite,
-                "se-inv-corner-tile" => seInvCornerSprite,
-                "core-corner-tile" => coreSprite,
-                _ => null,
-            };
+                fieldName switch {
+                        "nw-corner-tile"     => nwCornerSprite,
+                        "ne-corner-tile"     => neCornerSprite,
+                        "sw-corner-tile"     => swCornerSprite,
+                        "se-corner-tile"     => seCornerSprite,
+                        "n-corner-tile"      => nShoreSprite,
+                        "e-corner-tile"      => eShoreSprite,
+                        "s-corner-tile"      => sShoreSprite,
+                        "w-corner-tile"      => wShoreSprite,
+                        "nw-inv-corner-tile" => nwInvCornerSprite,
+                        "ne-inv-corner-tile" => neInvCornerSprite,
+                        "sw-inv-corner-tile" => swInvCornerSprite,
+                        "se-inv-corner-tile" => seInvCornerSprite,
+                        "core-corner-tile"   => coreSprite,
+                        _                    => null,
+                };
 
         public void SetOutputTexture(Texture2D outputTex) => _outputTexture = outputTex;
 
@@ -199,7 +242,7 @@ namespace TilesetGenerator {
                     return;
                 }
 
-                await _tilePacker.CreateTilesetFromBaseTexture(_convertedInputTexture, inputFilename, this, _cancellationTokenSource.Token);
+                await _tilePacker.CreateTilesetFromBaseTexture(_convertedInputTexture, inputFilename, outputFolderPath, this, _cancellationTokenSource.Token);
             }
             catch (Exception e) {
                 Debug.LogError($"Error during tileset generation: {e.Message}");
@@ -215,6 +258,7 @@ namespace TilesetGenerator {
             _tilePacker ??= new();
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new();
+            _inputTexture = spriteSheet;
             try {
                 _generatingTileset = true;
 
@@ -223,7 +267,7 @@ namespace TilesetGenerator {
                     return;
                 }
 
-                await _tilePacker.CreateTilesetFromBaseTexture(_inputTexture, inputFilename, this, _cancellationTokenSource.Token);
+                await _tilePacker.CreateTilesetFromBaseTexture(_inputTexture, inputFilename, outputFolderPath, this, _cancellationTokenSource.Token);
             }
             catch (Exception e) {
                 Debug.LogError($"Error during tileset generation: {e.Message}");
@@ -236,18 +280,26 @@ namespace TilesetGenerator {
         }
 
         private bool ValidateInputSprites() =>
-            nwCornerSprite
-            && neCornerSprite
-            && swCornerSprite
-            && seCornerSprite
-            && nShoreSprite
-            && eShoreSprite
-            && sShoreSprite
-            && wShoreSprite
-            && nwInvCornerSprite
-            && neInvCornerSprite
-            && swInvCornerSprite
-            && seInvCornerSprite
-            && coreSprite;
+                nwCornerSprite
+                && neCornerSprite
+                && swCornerSprite
+                && seCornerSprite
+                && nShoreSprite
+                && eShoreSprite
+                && sShoreSprite
+                && wShoreSprite
+                && nwInvCornerSprite
+                && neInvCornerSprite
+                && swInvCornerSprite
+                && seInvCornerSprite
+                && coreSprite;
+
+        private bool ValidateInputSpriteSheet() =>
+                spriteSheet
+                && spriteSheet.width > 0
+                && spriteSheet.height == spriteSheet.width 
+                && spriteSheet.width == Mathf.NextPowerOfTwo(spriteSheet.width);
+
+        public void RefreshOutputTexture(Texture2D finalTexture) => _outputTexturePreviewImage.image = finalTexture;
     }
 }

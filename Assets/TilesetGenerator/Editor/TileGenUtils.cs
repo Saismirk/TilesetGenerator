@@ -56,7 +56,8 @@ namespace TilesetGenerator {
             textureImporter.spriteImportMode = SpriteImportMode.Multiple;
             textureImporter.mipmapEnabled = false;
             textureImporter.filterMode = FilterMode.Point;
-            textureImporter.spritePixelsPerUnit = (int)(TilesetGenerator.ts * (1 + 21f / 64f));
+            // textureImporter.spritePixelsPerUnit = (int)(TilesetGenerator.ts * (1 + 21f / 64f));
+            textureImporter.spritePixelsPerUnit = TilesetGenerator.ts;
             var textureSettings = new TextureImporterSettings();
             textureImporter.ReadTextureSettings(textureSettings);
             textureSettings.spriteMeshType = SpriteMeshType.FullRect;

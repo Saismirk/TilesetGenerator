@@ -1,10 +1,9 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
     <Style src="project://database/Assets/TilesetGenerator/Editor/TilesetGeneratorEditorWindow.uss?fileID=7433441132597879392&amp;guid=117ba8ac9d50f4f5abf066be5b1d3488&amp;type=3#TilesetGeneratorEditorWindow" />
     <ui:ScrollView horizontal-scroller-visibility="Hidden">
-        <ui:TextField label="File Name" placeholder-text="TilesetFilename" data-source-type="TilesetGenerator.TilesetGeneratorEditorWindow, Assembly-CSharp-Editor" binding-path="_inputFilename" emoji-fallback-support="false" />
         <ui:VisualElement name="input-container" class="panel-window">
-            <ui:Label text="Tileset Input" enable-rich-text="false" emoji-fallback-support="false" double-click-selects-word="false" triple-click-selects-line="false" class="panel-label" />
-            <ui:TabView>
+            <ui:Label text="Tileset Input Method" enable-rich-text="false" emoji-fallback-support="false" double-click-selects-word="false" triple-click-selects-line="false" class="panel-label" />
+            <ui:TabView name="tabs">
                 <ui:Tab label="Sprites Input" name="sprite-input-tab">
                     <ui:ScrollView vertical-scroller-visibility="Hidden">
                         <ui:VisualElement class="panel">
@@ -72,13 +71,6 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="tileset-gen-sprites-container" class="panel-window" style="flex-grow: 1; margin-bottom: 4px;">
-                                <ui:Label text="Tileset Generation" class="panel-label" />
-                                <ui:Label text="Info" name="generation-info-sprites" style="padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;" />
-                                <ui:VisualElement style="flex-grow: 1; max-width: 200px; min-width: 50px; align-self: center; margin-bottom: 10px;">
-                                    <ui:Button text="Generate Tileset" name="generate-tileset-sprites-button" enable-rich-text="false" style="flex-grow: 1; flex-shrink: 1;" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:Tab>
@@ -87,15 +79,23 @@
                     <ui:VisualElement name="input-container" style="flex-grow: 1; align-self: center; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; background-color: rgba(0, 0, 0, 0.17); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; margin-top: 8px; margin-right: 8px; margin-bottom: 8px; margin-left: 8px;">
                         <TilesetGenerator.Controls.Image name="input-image" style="height: 200px; width: 200px;" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="tileset-gen-sprites-container" class="panel-window" style="flex-grow: 1; margin-bottom: 4px;">
-                        <ui:Label text="Tileset Generation" class="panel-label" />
-                        <ui:Label text="Info" name="generation-info-sprites" style="padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;" />
-                        <ui:VisualElement style="flex-grow: 1; max-width: 200px; min-width: 50px; align-self: center; margin-bottom: 10px;">
-                            <ui:Button text="Generate Tileset" name="generate-tileset-spritesheet-button" enable-rich-text="false" style="flex-grow: 1; flex-shrink: 1;" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
                 </ui:Tab>
             </ui:TabView>
+        </ui:VisualElement>
+        <ui:VisualElement name="tileset-gen-sprites-container" class="panel-window" style="flex-grow: 1; margin-bottom: 4px;">
+            <ui:Label text="Tileset Generation" class="panel-label" />
+            <ui:TextField label="File Name" placeholder-text="Tileset Filename" binding-path="inputFilename" emoji-fallback-support="false" hide-placeholder-on-focus="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
+            <ui:VisualElement style="flex-grow: 1; flex-direction: row; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
+                <ui:TextField label="Output Folder" hide-placeholder-on-focus="true" readonly="true" placeholder-text="Output Folder Path" binding-path="outputFolderPath" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                <ui:Button text="Browse" name="browse-folder-button" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; flex-direction: row; background-color: rgba(0, 0, 0, 0.13); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px;">
+                <TilesetGenerator.Controls.Image name="info-icon" />
+                <ui:Label text="Info" name="generation-info-sprites" style="flex-grow: 1; -unity-text-align: middle-left; padding-left: 5px;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; max-width: 200px; min-width: 50px; align-self: center; margin-bottom: 10px;">
+                <ui:Button text="Generate Tileset" name="generate-tileset-sprites-button" enable-rich-text="false" style="flex-grow: 1; flex-shrink: 1;" />
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="output-container" class="panel-window" style="flex-grow: 1;">
             <ui:Label text="Output" class="panel-label" />
