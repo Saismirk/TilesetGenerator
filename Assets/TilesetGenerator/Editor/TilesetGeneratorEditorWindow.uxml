@@ -1,0 +1,107 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/TilesetGenerator/Editor/TilesetGeneratorEditorWindow.uss?fileID=7433441132597879392&amp;guid=117ba8ac9d50f4f5abf066be5b1d3488&amp;type=3#TilesetGeneratorEditorWindow" />
+    <ui:ScrollView horizontal-scroller-visibility="Hidden">
+        <ui:TextField label="File Name" placeholder-text="TilesetFilename" data-source-type="TilesetGenerator.TilesetGeneratorEditorWindow, Assembly-CSharp-Editor" binding-path="_inputFilename" emoji-fallback-support="false" />
+        <ui:VisualElement name="input-container" class="panel-window">
+            <ui:Label text="Tileset Input" enable-rich-text="false" emoji-fallback-support="false" double-click-selects-word="false" triple-click-selects-line="false" class="panel-label" />
+            <ui:TabView>
+                <ui:Tab label="Sprites Input" name="sprite-input-tab">
+                    <ui:ScrollView vertical-scroller-visibility="Hidden">
+                        <ui:VisualElement class="panel">
+                            <ui:VisualElement name="corner-tile-container" style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: center; align-self: center; align-content: center; min-width: 400px; max-width: 450px;">
+                                <ui:VisualElement style="flex-grow: 1; height: 200px; align-content: stretch; align-self: center; justify-content: center;">
+                                    <ui:Label text="Corner Layout" style="-unity-text-align: upper-center; -unity-font-style: bold;" />
+                                    <ui:VisualElement name="corner-layout-example" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/TilesetGenerator/Editor/Textures/tileset_corner_layout.png?fileID=2800000&amp;guid=7e257622c9a9f4918835c05e0fc61beb&amp;type=3#tileset_corner_layout&quot;); -unity-background-scale-mode: scale-and-crop; -unity-slice-type: sliced; align-self: center; justify-content: space-around; flex-shrink: 0; max-width: 196px; max-height: 196px; min-width: 64px; min-height: 64px; width: 196px; height: 196px; flex-direction: column; align-content: stretch;">
+                                        <ui:VisualElement style="flex-grow: 1; width: 100%; height: 33.333%; flex-direction: row;">
+                                            <ui:VisualElement name="nw-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="n-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="ne-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                        </ui:VisualElement>
+                                        <ui:VisualElement style="flex-grow: 1; width: 100%; height: 33.333%; flex-direction: row;">
+                                            <ui:VisualElement name="w-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="core-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="e-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                        </ui:VisualElement>
+                                        <ui:VisualElement style="flex-grow: 1; width: 100%; height: 33.333%; flex-direction: row;">
+                                            <ui:VisualElement name="sw-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="s-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="se-corner-highlight" class="title__selected" style="flex-grow: 0; width: 33.333%; height: 100%; flex-shrink: 0;" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="corner-tiles" style="flex-grow: 1; flex-direction: column;">
+                                    <ui:VisualElement name="north-tiles" style="flex-grow: 1; flex-direction: row;">
+                                        <TilesetGenerator.Controls.TileField tile-name="NW Corner" name="nw-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="N Shore" name="n-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="NE Corner" name="ne-corner-tile" style="width: 72px; align-self: center;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="middle-tiles" style="flex-grow: 1; flex-direction: row;">
+                                        <TilesetGenerator.Controls.TileField tile-name="W Shore" name="w-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="Core" name="core-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="E Shore" name="e-corner-tile" style="width: 72px; align-self: center;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="south-tiles" style="flex-grow: 1; flex-direction: row;">
+                                        <TilesetGenerator.Controls.TileField tile-name="SW Corner" name="sw-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="S Shore" name="s-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="SE Corner" name="se-corner-tile" style="width: 72px; align-self: center;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="inv-corner-tile-container" style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: center; align-self: center; align-content: center; min-width: 400px; max-width: 450px; margin-top: 10px;">
+                                <ui:VisualElement style="flex-grow: 1; height: 190px; align-content: stretch; align-self: center; justify-content: center; padding-bottom: 18px;">
+                                    <ui:Label text="Inverse &#10;Corner Layout" style="-unity-text-align: upper-center; -unity-font-style: bold;" />
+                                    <ui:VisualElement name="inv-corner-layout-example" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/TilesetGenerator/Editor/Textures/tileset_inv_corner_layout.png?fileID=2800000&amp;guid=a1d71dbe1dcfe48df843b243d45840fc&amp;type=3#tileset_inv_corner_layout&quot;); -unity-background-scale-mode: scale-and-crop; -unity-slice-type: sliced; align-self: center; justify-content: space-around; flex-shrink: 0; max-width: 128px; max-height: 128px; min-width: 64px; min-height: 64px; width: 128px; height: 128px;">
+                                        <ui:VisualElement style="flex-grow: 1; width: 100%; height: 50%; flex-direction: row;">
+                                            <ui:VisualElement name="nw-inv-highlight" class="title__selected" style="flex-grow: 0; width: 50%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="ne-inv-highlight" class="title__selected" style="flex-grow: 0; width: 50%; height: 100%; flex-shrink: 0;" />
+                                        </ui:VisualElement>
+                                        <ui:VisualElement style="flex-grow: 1; width: 100%; height: 50%; flex-direction: row;">
+                                            <ui:VisualElement name="sw-inv-highlight" class="title__selected" style="flex-grow: 0; width: 50%; height: 100%; flex-shrink: 0;" />
+                                            <ui:VisualElement name="se-inv-highlight" class="title__selected" style="flex-grow: 0; width: 50%; height: 100%; flex-shrink: 0;" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="inv-corner-tiles" style="flex-grow: 1; flex-direction: column; justify-content: space-around; align-self: center; align-content: center; align-items: center; height: 172px;">
+                                    <ui:VisualElement name="north-tiles" style="flex-grow: 0; flex-direction: row;">
+                                        <TilesetGenerator.Controls.TileField tile-name="NW Inverse" name="nw-inv-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="NE Inverse" name="ne-inv-corner-tile" style="width: 72px; align-self: center;" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="south-tiles" style="flex-grow: 0; flex-direction: row;">
+                                        <TilesetGenerator.Controls.TileField tile-name="SW Inverse" name="sw-inv-corner-tile" style="width: 72px; align-self: center;" />
+                                        <TilesetGenerator.Controls.TileField tile-name="SE Inverse" name="se-inv-corner-tile" style="width: 72px; align-self: center;" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="tileset-gen-sprites-container" class="panel-window" style="flex-grow: 1; margin-bottom: 4px;">
+                                <ui:Label text="Tileset Generation" class="panel-label" />
+                                <ui:Label text="Info" name="generation-info-sprites" style="padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;" />
+                                <ui:VisualElement style="flex-grow: 1; max-width: 200px; min-width: 50px; align-self: center; margin-bottom: 10px;">
+                                    <ui:Button text="Generate Tileset" name="generate-tileset-sprites-button" enable-rich-text="false" style="flex-grow: 1; flex-shrink: 1;" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+                </ui:Tab>
+                <ui:Tab label="Spritesheet Input" name="spritesheet-input-tab">
+                    <uie:ObjectField label="Spritesheet" name="input-spritesheet-field" type="UnityEngine.Texture2D, UnityEngine.CoreModule" style="margin-top: 6px; margin-right: 6px; margin-bottom: 6px; margin-left: 6px;" />
+                    <ui:VisualElement name="input-container" style="flex-grow: 1; align-self: center; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; background-color: rgba(0, 0, 0, 0.17); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; margin-top: 8px; margin-right: 8px; margin-bottom: 8px; margin-left: 8px;">
+                        <TilesetGenerator.Controls.Image name="input-image" style="height: 200px; width: 200px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="tileset-gen-sprites-container" class="panel-window" style="flex-grow: 1; margin-bottom: 4px;">
+                        <ui:Label text="Tileset Generation" class="panel-label" />
+                        <ui:Label text="Info" name="generation-info-sprites" style="padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px;" />
+                        <ui:VisualElement style="flex-grow: 1; max-width: 200px; min-width: 50px; align-self: center; margin-bottom: 10px;">
+                            <ui:Button text="Generate Tileset" name="generate-tileset-spritesheet-button" enable-rich-text="false" style="flex-grow: 1; flex-shrink: 1;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Tab>
+            </ui:TabView>
+        </ui:VisualElement>
+        <ui:VisualElement name="output-container" class="panel-window" style="flex-grow: 1;">
+            <ui:Label text="Output" class="panel-label" />
+            <ui:VisualElement name="output-panel" style="flex-grow: 1; align-self: center; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; background-color: rgba(0, 0, 0, 0.17); border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; margin-top: 8px; margin-right: 8px; margin-bottom: 8px; margin-left: 8px;">
+                <TilesetGenerator.Controls.Image name="output-image" style="height: 200px; width: 200px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:ScrollView>
+</ui:UXML>
