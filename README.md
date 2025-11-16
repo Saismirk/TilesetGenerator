@@ -15,16 +15,23 @@ How it works
 
 You can select either of the two ways to generate tilesets by clicking on the tabs at the top of the window.
 
-![Tab Selection](Assets/TilesetGenerator/Documentation/tabs.png)
+<p align="center">
+  <img src="Assets/TilesetGenerator/Documentation/tabs.png" />
+</p>
 
 Sprites Input
 -------------
 In this mode, you can assign a set of sprites to generate a tileset.
 The sprites should be assigned to the fields below the tab and correspond to the example layout displayed on the left:
 
-![Example of Sprites Input](Assets/TilesetGenerator/Documentation/sprites-input.png)
+<p align="center">
+  <img src="Assets/TilesetGenerator/Documentation/sprites-input.png" />
+</p>
+
 Spritesheet Input
 -------------
 In this mode only a single texture is required. However, the texture ***has to have power of two*** dimensions (eg. 128x128) and the following layout:
 
-![Example of Spritesheet Input](Assets/TilesetGenerator/Documentation/spritesheet-input.png)
+<p align="center">
+  <img src="Assets/TilesetGenerator/Documentation/spritesheet-input.png" />
+</p>
