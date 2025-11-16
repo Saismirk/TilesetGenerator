@@ -1,4 +1,4 @@
-Tileset Generator
+Tileset Generator For Unity
 ================
 ![Static Badge](https://img.shields.io/badge/Unity-6000%2B-black.svg?style=flat&logo=unity&color=%231f1f1f)
 
